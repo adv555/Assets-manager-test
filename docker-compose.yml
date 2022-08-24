@@ -1,6 +1,34 @@
 version: "3.8"
 
 services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    env_file: ./.env.dev
+    ports:
+      - ${BACKEND_PORT}:${BACKEND_PORT}
+    volumes:
+      - ./backend/src:/app/src
+      - ./shared:/app/src/shared
+      - ./backend/test:/app/test
+    depends_on:
+      - db
+      - redis-server
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    env_file: ./.env.dev
+    ports:
+      - ${FRONTEND_PORT}:${FRONTEND_PORT}
+    volumes:
+      - ./frontend/src:/app/src
+      - ./shared:/app/src/shared
+    depends_on:
+      - backend
+
   db:
     image: postgres:14.2-alpine
     restart: on-failure
@@ -10,4 +38,9 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - ${DB_PORT}:${DB_PORT}
-    env_file: ./.env.dev
+
+  redis-server:
+    image: redis:latest
+    restart: on-failure
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
