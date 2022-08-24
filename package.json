@@ -1,0 +1,12 @@
+{
+  "name": "assets-manager-test",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "backend:symlink-shared": "ln -sf $(pwd)/shared $(pwd)/backend/src/shared",
+    "frontend:symlink-shared": "ln -sf $(pwd)/shared $(pwd)/frontend/src/shared",
+    "symlink-shared": "npm run backend:symlink-shared && npm run frontend:symlink-shared",
+    "seed:dev": "docker-compose --env-file=.env.dev exec backend npx sequelize-cli db:seed:all"
+  },
+  "author": ""
+}
