@@ -8,7 +8,7 @@ async function bootstrap() {
     cors: true,
   });
   app.useGlobalPipes(new ValidationPipe());
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api');
 
   const options = new DocumentBuilder()
     .setTitle('Assets Manager')
