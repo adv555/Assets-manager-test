@@ -10,12 +10,12 @@ export class UserEntity extends Base {
   password: string;
 
   @Column({ default: '' })
-  name: string;
+  name?: string;
 
   @Column({ default: false, name: 'is_verify' })
-  isVerified: boolean;
+  isVerified?: boolean;
 
-  @Column({ default: '', name: 'vatar_path' })
+  @Column({ default: '', name: 'avatar_path' })
   avatarPath?: string;
 
   // @OneToMany(() => WalletEntity, (wallet) => wallet.wallts)

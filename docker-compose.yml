@@ -1,4 +1,6 @@
-version: "3.8"
+# @format
+
+version: '3.8'
 
 services:
   backend:
@@ -8,6 +10,9 @@ services:
     env_file: ./.env.dev
     ports:
       - ${BACKEND_PORT}:${BACKEND_PORT}
+    secret: ${JWT_SECRET}
+
+    secretOrKey: ${JWT_SECRET}
     volumes:
       - ./backend/src:/app/src
       - ./shared:/app/src/shared
