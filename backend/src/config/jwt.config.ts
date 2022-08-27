@@ -5,5 +5,5 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 export const getJwtConfig = async (
   configService: ConfigService,
 ): Promise<JwtModuleOptions> => ({
-  secret: process.env.JWT_SECRET,
+  secret: process.env.JWT_SECRET || 'fintech',
 });

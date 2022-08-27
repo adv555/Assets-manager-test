@@ -1,6 +1,8 @@
 import { AuthDto } from './dto/auth.dto';
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -14,6 +16,8 @@ import { isHalfWidth } from 'class-validator';
 // import { Auth, google } from 'googleapis';
 import uuid from 'uuid';
 import { sendMail } from './servise/mail.service';
+import { MailerService } from '@nestjs-modules/mailer';
+import { join } from 'path';
 
 @Injectable()
 export class AuthService {
@@ -21,27 +25,33 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly jwtService: JwtService,
-    private readonly mailService: sendMail,
+    private readonly mailerService: MailerService,
   ) {}
 
   async authGoogle() {}
 
+  //
+  //
+  //
   async login(dto: AuthDto) {
     const user = await this.validateUser(dto);
-
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRt(user.id, tokens.refresh_token);
     return {
       user: this.returnUser(user),
-      tokens: this.getTokens(user.id, user.email),
+      tokens: tokens,
     };
   }
-
+  //
+  //
+  //
   async register(dto: AuthDto) {
     const oldUser = await this.userRepository.findOneBy({ email: dto.email });
 
     if (oldUser) {
       throw new BadRequestException('Email already exists');
     }
-    // const activationLink = uuid.v4();
+    const activationLink = uuid.v4();
     const salt = await genSalt(3);
     const newUser = await this.userRepository.create({
       email: dto.email,
@@ -50,6 +60,31 @@ export class AuthService {
 
     const tokens = await this.getTokens(newUser.id, newUser.email);
     // await this.mailService.sendActivationMail(dto.email, activationLink);
+    await this.mailerService
+      .sendMail({
+        from: process.env.SMTP_USER || 'fitechmate@gmail.com',
+        to: dto.email,
+        subject: 'Register',
+        text: '=)',
+        html: `
+          <div>
+          <h1>Hello World =) </h1>
+          <h1>Click  ${activationLink} </h1>
+          <a href='${activationLink}'>Click Me</a>
+
+          </div>
+        `,
+        template: join(__dirname, '/../templates', 'confirmReg'),
+        context: {
+          username: dto.email,
+        },
+      })
+      .catch((e) => {
+        throw new HttpException(
+          `Error: ${JSON.stringify(e)}`,
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        );
+      });
 
     await this.updateRt(newUser.id, tokens.refresh_token);
     const user = await this.userRepository.save(newUser);
@@ -59,7 +94,9 @@ export class AuthService {
       tokens,
     };
   }
-
+  //
+  //
+  //
   async validateUser(dto: AuthDto) {
     const user = await this.userRepository.findOne({
       where: {
@@ -77,7 +114,9 @@ export class AuthService {
 
     return user;
   }
-
+  //
+  //
+  //
   async getTokens(userId: number, email: string) {
     const data = {
       id: userId,
@@ -92,7 +131,7 @@ export class AuthService {
 
       this.jwtService.signAsync(data, {
         expiresIn: 60 * 60 * 24 * 14,
-        secret: process.env.JWT_SECRET || 'fintechR',
+        secret: process.env.JWT_REFRESH_SECRET || 'fintechR',
       }),
     ]);
 
@@ -101,7 +140,9 @@ export class AuthService {
       refresh_token: rt,
     };
   }
-
+  //
+  //
+  //
   async updateRt(userId: number, rt: string) {
     const salt = await genSalt(3);
     const rtHash = await hash(rt, salt);
@@ -111,7 +152,7 @@ export class AuthService {
     return user.refreshTokenHash;
   }
 
-  async returnUser(user: UserEntity) {
+  returnUser(user: UserEntity) {
     return {
       id: user.id,
       email: user.email,

@@ -30,4 +30,15 @@ export class AuthController {
   async register(@Body() dto: AuthDto) {
     return this.authService.register(dto);
   }
+
+  @Get('activate')
+  async activatedLink() {
+    return;
+  }
+
+  @Post('logout')
+  async logout() {}
+
+  @Post('refresh')
+  async refreshTokens() {}
 }
