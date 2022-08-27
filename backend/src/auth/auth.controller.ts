@@ -1,4 +1,4 @@
-import { sendMail } from './servise/mail.service';
+import { Tokens } from './types/tokens.type';
 import {
   Body,
   Controller,
@@ -15,10 +15,7 @@ import { UserEntity } from 'src/user/user.entity';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly mailService: sendMail,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @UsePipes(new ValidationPipe())
   @Post('login')

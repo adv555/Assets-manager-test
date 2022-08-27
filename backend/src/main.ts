@@ -11,7 +11,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const options = new DocumentBuilder()
-    .setTitle('Assets Manager')
+    .setTitle('Fintech Manager')
     .setDescription('Assets Manager API Documentation')
     .build();
   const document = SwaggerModule.createDocument(app, options);
