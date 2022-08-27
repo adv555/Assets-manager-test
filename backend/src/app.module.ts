@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 //
 import { getTypeOrmConfig } from './config/typeorm.config';
 import { UserModule } from './user/user.module';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserModule } from './user/user.module';
       useFactory: getTypeOrmConfig,
     }),
     AuthModule,
+    WalletModule,
   ],
   controllers: [AppController],
   providers: [AppService],

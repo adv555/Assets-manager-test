@@ -11,6 +11,9 @@ import { UserEntity } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { compare, genSalt, hash } from 'bcryptjs';
 import { isHalfWidth } from 'class-validator';
+// import { Auth, google } from 'googleapis';
+import uuid from 'uuid';
+import { sendMail } from './servise/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -18,14 +21,17 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly jwtService: JwtService,
+    private readonly mailService: sendMail,
   ) {}
+
+  async authGoogle() {}
 
   async login(dto: AuthDto) {
     const user = await this.validateUser(dto);
 
     return {
       user: this.returnUser(user),
-      accessToken: await this.getAccessToken(user.id),
+      tokens: this.getTokens(user.id, user.email),
     };
   }
 
@@ -35,18 +41,22 @@ export class AuthService {
     if (oldUser) {
       throw new BadRequestException('Email already exists');
     }
-
+    // const activationLink = uuid.v4();
     const salt = await genSalt(3);
     const newUser = await this.userRepository.create({
       email: dto.email,
       password: await hash(dto.password, salt),
     });
 
+    const tokens = await this.getTokens(newUser.id, newUser.email);
+    // await this.mailService.sendActivationMail(dto.email, activationLink);
+
+    await this.updateRt(newUser.id, tokens.refresh_token);
     const user = await this.userRepository.save(newUser);
 
     return {
-      user: user,
-      accesssToken: await this.getAccessToken(user.id),
+      user,
+      tokens,
     };
   }
 
@@ -68,13 +78,37 @@ export class AuthService {
     return user;
   }
 
-  async getAccessToken(userId: number) {
+  async getTokens(userId: number, email: string) {
     const data = {
       id: userId,
+      email,
     };
-    return await this.jwtService.signAsync(data, {
-      expiresIn: '20d',
-    });
+
+    const [at, rt] = await Promise.all([
+      this.jwtService.signAsync(data, {
+        expiresIn: 60 * 60,
+        secret: process.env.JWT_SECRET || 'fintech',
+      }),
+
+      this.jwtService.signAsync(data, {
+        expiresIn: 60 * 60 * 24 * 14,
+        secret: process.env.JWT_SECRET || 'fintechR',
+      }),
+    ]);
+
+    return {
+      access_token: at,
+      refresh_token: rt,
+    };
+  }
+
+  async updateRt(userId: number, rt: string) {
+    const salt = await genSalt(3);
+    const rtHash = await hash(rt, salt);
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    user.refreshTokenHash = rtHash;
+    await this.userRepository.save(user);
+    return user.refreshTokenHash;
   }
 
   async returnUser(user: UserEntity) {

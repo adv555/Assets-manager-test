@@ -5,9 +5,10 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserEntity } from 'src/user/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Request } from 'express';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtRtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(UserEntity)
@@ -16,11 +17,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: true,
-      secretOrKey: 'fintech',
+      secretOrKey: process.env.JWT_SECRET || 'fintechR',
+      passReqToCallback: true,
     });
   }
 
-  async validate({ id }: Pick<UserEntity, 'id'>) {
-    return this.userRepository.findBy({ id });
+  async validate(req: Request, payload: any) {
+    const refreshToken = req.get('authorization').replace('Bearer', '').trim();
+    return {
+      ...payload,
+      refreshToken,
+    };
   }
 }
