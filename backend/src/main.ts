@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -9,6 +10,7 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api');
+  app.use(cookieParser());
 
   const options = new DocumentBuilder()
     .setTitle('Fintech Manager')
@@ -18,7 +20,7 @@ async function bootstrap() {
   SwaggerModule.setup('swagger', app, document);
 
   app.useGlobalPipes(new ValidationPipe());
-  app.enableCors({ origin: true });
+  app.enableCors({ origin: true, credentials: true });
 
   await app.listen(process.env.BACKEND_PORT);
 }

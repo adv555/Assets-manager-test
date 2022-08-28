@@ -10,8 +10,8 @@ export const getMailConfig = async (
       port: process.env.SMTP_PORT || '587',
       secure: false,
       auth: {
-        user: process.env.SMTP_USER || 'fitechmate@gmail.com',
-        pass: process.env.SMTP_PASSWORD || 'fintech123',
+        user: 'fitechmate@gmail.com',
+        pass: 'fintech123',
       },
     },
   };

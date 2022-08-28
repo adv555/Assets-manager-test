@@ -1,28 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserEntity } from 'src/user/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+
 import { Request } from 'express';
 
+type JwtPayload = {
+  id: number;
+  email: string;
+  iat: number;
+  exp: number;
+};
 @Injectable()
 export class JwtRtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
-  constructor(
-    private readonly configService: ConfigService,
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
-  ) {
+  constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: true,
-      secretOrKey: process.env.JWT_SECRET || 'fintechR',
+      secretOrKey: 'fintechR' || process.env.JWT_SECRET,
       passReqToCallback: true,
     });
   }
 
-  async validate(req: Request, payload: any) {
+  async validate(req: Request, payload: JwtPayload) {
     const refreshToken = req.get('authorization').replace('Bearer', '').trim();
     return {
       ...payload,

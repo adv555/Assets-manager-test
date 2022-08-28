@@ -12,14 +12,10 @@ import { JwtRtStrategy } from './strategies/jwtRt.strategy';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, JwtAtStrategy, JwtRtStrategy, sendMail],
+  providers: [AuthService, JwtAtStrategy, JwtRtStrategy],
   imports: [
     ConfigModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: getJwtConfig,
-    }),
+    JwtModule.register({}),
     TypeOrmModule.forFeature([UserEntity]),
   ],
 })

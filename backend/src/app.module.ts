@@ -14,10 +14,16 @@ import { WalletModule } from './wallet/wallet.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: getMailConfig,
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: process.env.SMTP_PORT || '587',
+        secure: false,
+        auth: {
+          user: 'fitechmate@gmail.com' || process.env.SMTP_USER,
+          pass: 'skwpccmthynpkjtq' || process.env.SMTP_PASSWORD,
+        },
+      },
     }),
 
     TypeOrmModule.forRootAsync({

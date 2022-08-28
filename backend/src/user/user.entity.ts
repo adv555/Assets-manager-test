@@ -19,7 +19,7 @@ export class UserEntity extends Base {
 
   @ApiProperty()
   @Column({ default: '' })
-  refreshTokenHash?: string;
+  refreshTokenHash: string;
 
   @ApiProperty()
   @Column({ default: '' })

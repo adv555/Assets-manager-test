@@ -1,6 +1,7 @@
 import { AuthDto } from './dto/auth.dto';
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -14,10 +15,11 @@ import { Repository } from 'typeorm';
 import { compare, genSalt, hash } from 'bcryptjs';
 import { isHalfWidth } from 'class-validator';
 // import { Auth, google } from 'googleapis';
-import uuid from 'uuid';
+import { v4 } from 'uuid';
 import { sendMail } from './servise/mail.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { join } from 'path';
+import { Request, Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -27,16 +29,41 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
   ) {}
+  //
+  //
+  //
 
   async authGoogle() {}
 
   //
   //
   //
-  async login(dto: AuthDto) {
+  async login(dto: AuthDto, res: Response) {
     const user = await this.validateUser(dto);
     const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRt(user.id, tokens.refresh_token);
+    this.updateRt(user.id, tokens.refresh_token);
+    res.cookie('token', tokens.access_token, { httpOnly: true });
+    // await this.mailerService
+    //   .sendMail({
+    //     to: dto.email,
+    //     from: 'dream.ffindor@gmail.com',
+    //     subject: 'Register',
+    //     text: '=)',
+    //     html: `
+    //     <div>
+    //     <h1>Hello World =) </h1>
+    //     <h1>Click   </h1>
+    //     <a href=''>Click Me</a>
+
+    //     </div>
+    //   `,
+    //   })
+    // .catch((e) => {
+    //   throw new HttpException(
+    //     `Error: ${JSON.stringify(e)}`,
+    //     HttpStatus.UNPROCESSABLE_ENTITY,
+    //   );
+    // });
     return {
       user: this.returnUser(user),
       tokens: tokens,
@@ -51,33 +78,29 @@ export class AuthService {
     if (oldUser) {
       throw new BadRequestException('Email already exists');
     }
-    const activationLink = uuid.v4();
+    const activationLink = v4();
     const salt = await genSalt(3);
     const newUser = await this.userRepository.create({
       email: dto.email,
       password: await hash(dto.password, salt),
+      activationLink: activationLink,
     });
 
     const tokens = await this.getTokens(newUser.id, newUser.email);
     // await this.mailService.sendActivationMail(dto.email, activationLink);
     await this.mailerService
       .sendMail({
-        from: process.env.SMTP_USER || 'fitechmate@gmail.com',
         to: dto.email,
+        from: 'dream.ffindor@gmail.com',
         subject: 'Register',
         text: '=)',
         html: `
           <div>
           <h1>Hello World =) </h1>
-          <h1>Click  ${activationLink} </h1>
-          <a href='${activationLink}'>Click Me</a>
+          <a href='http://localhost:3001/api/auth/${activationLink}'>Click Me</a>
 
           </div>
         `,
-        template: join(__dirname, '/../templates', 'confirmReg'),
-        context: {
-          username: dto.email,
-        },
       })
       .catch((e) => {
         throw new HttpException(
@@ -86,7 +109,7 @@ export class AuthService {
         );
       });
 
-    await this.updateRt(newUser.id, tokens.refresh_token);
+    this.updateRt(newUser.id, tokens.refresh_token);
     const user = await this.userRepository.save(newUser);
 
     return {
@@ -94,6 +117,45 @@ export class AuthService {
       tokens,
     };
   }
+  //
+  //
+  //
+  async logout(userId: number, res: Response) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    user.refreshTokenHash = '';
+    try {
+      await this.userRepository.save(user);
+    } catch (e) {
+      console.log(e);
+      return new NotFoundException('Error with logout');
+    }
+    res.clearCookie('token');
+    return { mesage: 'good' };
+  }
+  //
+  //
+  //
+  async refreshToken(userId: number, rt: string, res: Response) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      return new ForbiddenException('Acces Denied');
+    }
+
+    const rtMatches = await compare(rt, user.refreshTokenHash);
+    if (!rtMatches) {
+      return new ForbiddenException('Acces Denied');
+    }
+
+    const tokens = await this.getTokens(user.id, user.email);
+    this.updateRt(user.id, tokens.refresh_token);
+    res.cookie('token', tokens.access_token, { httpOnly: true });
+
+    return {
+      user: this.returnUser(user),
+      tokens: tokens,
+    };
+  }
+
   //
   //
   //
@@ -126,12 +188,12 @@ export class AuthService {
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(data, {
         expiresIn: 60 * 60,
-        secret: process.env.JWT_SECRET || 'fintech',
+        secret: 'fintech' || process.env.JWT_SECRET,
       }),
 
       this.jwtService.signAsync(data, {
         expiresIn: 60 * 60 * 24 * 14,
-        secret: process.env.JWT_REFRESH_SECRET || 'fintechR',
+        secret: 'fintechR' || process.env.JWT_REFRESH_SECRET,
       }),
     ]);
 
@@ -150,6 +212,24 @@ export class AuthService {
     user.refreshTokenHash = rtHash;
     await this.userRepository.save(user);
     return user.refreshTokenHash;
+  }
+
+  //
+  //
+  //
+
+  async activate(activationLink: string) {
+    const user = await this.userRepository.findOneBy({ activationLink });
+
+    if (!user) {
+      throw new Error('Link not found');
+    }
+
+    user.isVerified = true;
+
+    await this.userRepository.save(user);
+
+    return 'true';
   }
 
   returnUser(user: UserEntity) {
