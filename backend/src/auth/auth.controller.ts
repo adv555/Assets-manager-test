@@ -28,12 +28,36 @@ import { isPositive } from 'class-validator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req: Request) {}
+  //
+  //
+  //
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  googleAuthRedirect(@Req() req: Request) {
+    return this.authService.authGoogle(req);
+  }
+
+  //
+  //
+  //
+
   @UsePipes(new ValidationPipe())
   @Post('login')
-  async login(@Body() dto: AuthDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() dto: AuthDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    console.log(req.cookies);
     return this.authService.login(dto, res);
   }
 
+  //
+  //
+  //
   @ApiOperation({ summary: 'Create new User' })
   @ApiResponse({ status: 201, type: UserEntity })
   @UsePipes(new ValidationPipe())
@@ -41,14 +65,18 @@ export class AuthController {
   async register(@Body() dto: AuthDto) {
     return this.authService.register(dto);
   }
-
+  //
+  //
+  //
   @Get(':link')
   @Redirect('http://localhost:3000')
   async activatedLink(@Param('link') link: string) {
     console.log(link);
     return this.authService.activate(link);
   }
-
+  //
+  //
+  //
   @UseGuards(AccessTokenGuard)
   @Post('logout')
   @HttpCode(200)
@@ -57,6 +85,7 @@ export class AuthController {
     console.log(user);
     return this.authService.logout(user, res);
   }
+  //
 
   @UseGuards(RefreshTokenGuard)
   @Post('refresh')
@@ -65,9 +94,15 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const id = req.user['id'];
-    console.log(id);
+    console.log('1');
+    const { toket, token } = req.cookies;
+    console.log(req.cookies);
+    console.log(token);
+    console.log('2');
 
-    return this.authService.refreshToken(id, req.user['refreshToken'], res);
+    // const id = req.user['id'];
+    // const tokens = req.user['refreshToken'];
+
+    return this.authService.refreshToken(1, token, res);
   }
 }

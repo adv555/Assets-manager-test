@@ -13,7 +13,9 @@ import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
     MailerModule.forRoot({
       transport: {
         host: process.env.SMTP_HOST || 'smtp.gmail.com',

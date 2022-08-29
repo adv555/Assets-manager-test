@@ -33,7 +33,15 @@ export class AuthService {
   //
   //
 
-  async authGoogle() {}
+  async authGoogle(req: Request) {
+    if (!req.user) {
+      throw new BadRequestException('No user from google');
+
+      return {
+        user: req.user,
+      };
+    }
+  }
 
   //
   //
@@ -42,7 +50,9 @@ export class AuthService {
     const user = await this.validateUser(dto);
     const tokens = await this.getTokens(user.id, user.email);
     this.updateRt(user.id, tokens.refresh_token);
-    res.cookie('token', tokens.access_token, { httpOnly: true });
+    res.cookie('token', tokens.refresh_token, {
+      maxAge: 60 * 60 * 24 * 20,
+    });
     // await this.mailerService
     //   .sendMail({
     //     to: dto.email,
@@ -148,7 +158,10 @@ export class AuthService {
 
     const tokens = await this.getTokens(user.id, user.email);
     this.updateRt(user.id, tokens.refresh_token);
-    res.cookie('token', tokens.access_token, { httpOnly: true });
+    res.cookie('token', tokens.refresh_token, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 20 * 1000,
+    });
 
     return {
       user: this.returnUser(user),

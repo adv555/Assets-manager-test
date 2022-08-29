@@ -9,11 +9,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { getJwtConfig } from 'src/config/jwt.config';
 import { sendMail } from './servise/mail.service';
 import { JwtRtStrategy } from './strategies/jwtRt.strategy';
+import { UserModule } from 'src/user/user.module';
+import { GoogleStrategy } from './strategies/google.strategt';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, JwtAtStrategy, JwtRtStrategy],
+  providers: [AuthService, JwtAtStrategy, JwtRtStrategy, GoogleStrategy],
   imports: [
+    UserModule,
     ConfigModule,
     JwtModule.register({}),
     TypeOrmModule.forFeature([UserEntity]),

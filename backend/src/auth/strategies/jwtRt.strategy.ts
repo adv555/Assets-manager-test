@@ -14,17 +14,26 @@ type JwtPayload = {
 export class JwtRtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        JwtRtStrategy.extractJwt,
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ]),
       secretOrKey: 'fintechR' || process.env.JWT_SECRET,
       passReqToCallback: true,
     });
   }
+  private static extractJwt(req: Request): string | null {
+    if (req.cookies && 'token' in req.cookies) {
+      return req.cookies.token;
+    }
+    return null;
+  }
 
   async validate(req: Request, payload: JwtPayload) {
-    const refreshToken = req.get('authorization').replace('Bearer', '').trim();
+    // const refreshToken = req.get('authorization').replace('Bearer', '').trim();
     return {
       ...payload,
-      refreshToken,
+      // refreshToken,
     };
   }
 }
