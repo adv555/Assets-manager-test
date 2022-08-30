@@ -15,6 +15,7 @@ module.exports = {
         },
         error: {
           DEFAULT: '#D34E24',
+          light: '#FF6A3D',
         },
         gray: {
           DEFAULT: '#909590',
