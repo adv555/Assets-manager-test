@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from './hooks/useAppDispatch';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/login/LoginPage';
 import { checkAuth } from './redux/slice/authSlice';
+import './index.css';
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -17,12 +18,16 @@ export default function App() {
   }, []);
 
   return (
-    <div className="Hello">
-      {isAuth ? <h1>Good</h1> : <LoginPage />}
-
-      <Routes>
-        <Route path={AppRoute.HOME} element={<HomePage />} />
-      </Routes>
+    <div>
+      {isAuth ? (
+        <>
+          <Routes>
+            <Route path={AppRoute.HOME} element={<HomePage />} />
+          </Routes>
+        </>
+      ) : (
+        <LoginPage />
+      )}
     </div>
   );
 }

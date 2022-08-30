@@ -99,6 +99,7 @@ export class AuthController {
     console.log(req.cookies);
     console.log(token);
     console.log('2');
+    console.log(process.env.SMTP_PASSWORD);
 
     // const id = req.user['id'];
     // const tokens = req.user['refreshToken'];

@@ -11,7 +11,6 @@ export const fetchLogin = createAsyncThunk(
   // Declare the type your function argument here:
   async (params) => {
     const { data } = await api.post('/auth/login', params);
-    localStorage.setItem('token', data.accessToken);
     return data;
   },
 );
@@ -21,7 +20,7 @@ export const Registration = createAsyncThunk(
   // Declare the type your function argument here:
   async (params) => {
     const { data } = await api.post('/auth/register', params);
-    localStorage.setItem('token', data.accessToken);
+    localStorage.setItem('token', data.tokens.access_token);
     return data;
   },
 );
@@ -30,7 +29,7 @@ export const Logout = createAsyncThunk(
   'users/fetchLogout',
   // Declare the type your function argument here:
   async () => {
-    const { data } = await api.post('logout');
+    const { data } = await api.post('/auth/logout');
     localStorage.removeItem('token');
     return data;
   },
@@ -77,6 +76,7 @@ const authSlice = createSlice({
       state.status = 'SUCCESS';
       state.isAuth = true;
       state.users = action.payload;
+      localStorage.setItem('token', action.payload.tokens.access_token);
     });
     builder.addCase(fetchLogin.rejected, (state, action) => {
       state.status = 'ERROR';
@@ -118,6 +118,7 @@ const authSlice = createSlice({
     builder.addCase(checkAuth.fulfilled, (state, action) => {
       state.status = 'SUCCESS';
       state.users = action.payload;
+      localStorage.setItem('token', action.payload.tokens.access_token);
 
       state.isAuth = true;
     });

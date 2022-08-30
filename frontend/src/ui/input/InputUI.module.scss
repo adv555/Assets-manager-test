@@ -1,0 +1,13 @@
+.input {
+  width: 100%;
+  background-color: white;
+  padding: 12px 20px;
+  margin: 5px 0;
+  border: 2px solid rgb(210, 210, 210);
+  border-radius: 14px;
+  transition: all 0.2s ease-in;
+
+  &:focus {
+    border: 2px solid rgb(26, 47, 101);
+  }
+}
