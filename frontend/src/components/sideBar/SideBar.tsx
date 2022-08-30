@@ -17,7 +17,7 @@ interface SideBarProps {
 
 const SideBar: React.FC<SideBarProps> = ({ logoLink, structure }) => {
   return (
-    <div className="sticky top-0 hidden bg-gray-ultralight md:block px-6 pt-7 h-screen md:max-w-[274px] w-full border-r border-r-neutral-200">
+    <div className="sticky top-0 hidden bg-gray-ultralight md:block px-6 pt-7 h-screen md:max-w-[274px] w-full">
       <Link to={logoLink} className="block w-[145px] h-[42px] mb-10">
         <Typography type={'h1'} children={'MyFinance'} />
       </Link>

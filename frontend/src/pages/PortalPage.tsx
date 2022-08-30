@@ -9,6 +9,7 @@ import { ReactComponent as TransactionIcon } from 'assets/icons/transaction.svg'
 import { ReactComponent as InvoiceIcon } from 'assets/icons/invoices.svg';
 import { ReactComponent as WalletIcon } from 'assets/icons/wallet.svg';
 import { ReactComponent as ChatIcon } from 'assets/icons/chat.svg';
+import { Layout } from 'components/common/Layout/Layout';
 
 const menuStructure = [
   {
@@ -27,8 +28,13 @@ const menuStructure = [
     icon: <WalletIcon />,
   },
   {
-    title: 'Invoices',
-    link: AppRoute.INVOICES,
+    title: 'Widgets',
+    link: AppRoute.WIDGETS,
+    icon: <InvoiceIcon />,
+  },
+  {
+    title: 'Moneybox',
+    link: AppRoute.MONEY_BOX,
     icon: <InvoiceIcon />,
   },
   {
@@ -45,13 +51,13 @@ const menuStructure = [
 
 const PortalPage: React.FC = () => {
   return (
-    <div className="flex">
+    <div className="flex ">
       <SideBar logoLink={AppRoute.DASHBOARD} structure={menuStructure} />
       <div className="w-full">
         <Header />
-        <div className="flex items-center justify-center">
+        <Layout>
           <Outlet />
-        </div>
+        </Layout>
       </div>
     </div>
   );

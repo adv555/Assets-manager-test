@@ -6,6 +6,8 @@ enum AppRoute {
   DASHBOARD = '/portal/dashboard',
   TRANSACTIONS = '/portal/transactions',
   INVOICES = '/portal/invoices',
+  WIDGETS = '/portal/widgets',
+  MONEY_BOX = '/portal/money-box',
   MY_WALLETS = '/portal/my-wallets',
   CHATS = '/portal/chats',
   SETTINGS = '/portal/settings',
