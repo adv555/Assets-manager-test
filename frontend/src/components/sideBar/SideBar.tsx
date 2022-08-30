@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import MenuItem from './MenuItem';
 import { Typography } from '../common/Typography/Typography';
-import LogoutButton from 'components/common/buttons/LogoutButton';
+import LogoutButton from '../common/buttons/LogoutButton';
 
 interface MenuStructureItem {
   title: string;
@@ -25,13 +25,7 @@ const SideBar: React.FC<SideBarProps> = ({ logoLink, structure }) => {
       <nav className="flex flex-col justify-between h-5/6">
         <div>
           {structure.map(({ link, title, icon }) => (
-            <MenuItem
-              key={link}
-              link={link}
-              label={title}
-              icon={icon}
-              linkClassName="py-4 pl-4 rounded-lg hover:bg-green-light transition"
-            />
+            <MenuItem key={link} link={link} label={title} icon={icon} />
           ))}
         </div>
         <div className="  text-gray  hover:text-gray-dark fill-gray hover:fill-gray-dark transition">
