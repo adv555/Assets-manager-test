@@ -6,7 +6,7 @@ export const getTypeOrmConfig = async (
 ): Promise<TypeOrmModuleOptions> => ({
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 5432,
+  port: Number(process.env.DB_PORT),
   database: process.env.POSTGRES_DB,
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,

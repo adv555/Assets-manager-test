@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { getMailConfig } from './config/mailer.config';
+// import { getMailConfig } from './config/mailer.config';
 //
 import { getTypeOrmConfig } from './config/typeorm.config';
 import { UserModule } from './user/user.module';
@@ -14,7 +14,7 @@ import { WalletModule } from './wallet/wallet.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
     }),
     MailerModule.forRoot({
       transport: {

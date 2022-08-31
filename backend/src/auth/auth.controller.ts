@@ -27,7 +27,9 @@ import { isPositive } from 'class-validator';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
+  //
+  //
+  //
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Req() req: Request) {}
@@ -69,7 +71,7 @@ export class AuthController {
   //
   //
   @Get(':link')
-  @Redirect('http://localhost:3000')
+  @Redirect('http://localhost:3000' || process.env.FRONTEND_URL)
   async activatedLink(@Param('link') link: string) {
     console.log(link);
     return this.authService.activate(link);
@@ -94,16 +96,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log('1');
     const { toket, token } = req.cookies;
-    console.log(req.cookies);
-    console.log(token);
-    console.log('2');
-    console.log(process.env.SMTP_PASSWORD);
-
-    // const id = req.user['id'];
-    // const tokens = req.user['refreshToken'];
-
     return this.authService.refreshToken(1, token, res);
   }
 }
