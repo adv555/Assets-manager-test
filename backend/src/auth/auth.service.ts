@@ -218,7 +218,7 @@ export class AuthService {
     user.isVerified = true;
 
     await this.userRepository.save(user);
-
+    console.log();
     return 'true';
   }
 
